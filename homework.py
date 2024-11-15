@@ -1,15 +1,22 @@
-...
+import logging
+import os
+import requests
+import time
+
+from dotenv import load_dotenv
+from telebot import TeleBot, types
+
+from exceptions import TokenError
 
 load_dotenv()
 
-
-PRACTICUM_TOKEN = ...
-TELEGRAM_TOKEN = ...
-TELEGRAM_CHAT_ID = ...
+practicum_token = os.getenv('PRACTICUM_TOKEN')
+telegram_token = os.getenv('TELEGRAM_TOKEN')
+telegram_chat_id = os.getenv('TELEGRAM_CHAT_ID')
 
 RETRY_PERIOD = 600
 ENDPOINT = 'https://practicum.yandex.ru/api/user_api/homework_statuses/'
-HEADERS = {'Authorization': f'OAuth {PRACTICUM_TOKEN}'}
+HEADERS = {'Authorization': f'OAuth {practicum_token}'}
 
 
 HOMEWORK_VERDICTS = {
@@ -20,7 +27,9 @@ HOMEWORK_VERDICTS = {
 
 
 def check_tokens():
-    ...
+    """Ищет токены в переменных окружения."""
+    if practicum_token and telegram_token and telegram_chat_id:
+        raise TokenError
 
 
 def send_message(bot, message):
@@ -44,18 +53,14 @@ def parse_status(homework):
 def main():
     """Основная логика работы бота."""
 
-    ...
-
     # Создаем объект класса бота
-    bot = ...
+    bot = TeleBot(token=telegram_token)
     timestamp = int(time.time())
-
-    ...
 
     while True:
         try:
-
-            ...
+            get_api_answer()
+            check_response()
 
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
