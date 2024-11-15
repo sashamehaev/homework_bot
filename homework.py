@@ -29,6 +29,8 @@ HOMEWORK_VERDICTS = {
 def check_tokens():
     """Ищет токены в переменных окружения."""
     if practicum_token and telegram_token and telegram_chat_id:
+        return
+    else:
         raise TokenError
 
 
@@ -37,7 +39,9 @@ def send_message(bot, message):
 
 
 def get_api_answer(timestamp):
-    ...
+    payload = {'from_date': timestamp}
+    response = requests.get(ENDPOINT, headers=HEADERS, params=payload)
+    return response.json()
 
 
 def check_response(response):
@@ -57,15 +61,19 @@ def main():
     bot = TeleBot(token=telegram_token)
     timestamp = int(time.time())
 
+    check_tokens()
+
     while True:
+        get_api_answer(timestamp)
         try:
-            get_api_answer()
-            check_response()
+            ...
 
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
             ...
         ...
+
+        time.sleep(RETRY_PERIOD)
 
 
 if __name__ == '__main__':
