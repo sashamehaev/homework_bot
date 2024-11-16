@@ -70,11 +70,8 @@ def main():
 
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
-            ...
-        ...
-
-        time.sleep(RETRY_PERIOD)
-
+        
+        bot.polling(interval=RETRY_PERIOD)
 
 if __name__ == '__main__':
     main()
