@@ -6,7 +6,7 @@ import time
 from dotenv import load_dotenv
 from telebot import TeleBot, types
 
-from exceptions import TokenError
+from exceptions import TokenError, ServerError
 
 load_dotenv()
 
@@ -41,11 +41,12 @@ def send_message(bot, message):
 def get_api_answer(timestamp):
     payload = {'from_date': timestamp}
     response = requests.get(ENDPOINT, headers=HEADERS, params=payload)
-    return response.json()
+    return response
 
 
 def check_response(response):
-    ...
+    if not response.ok:
+        raise ServerError
 
 
 def parse_status(homework):
@@ -64,13 +65,15 @@ def main():
     check_tokens()
 
     while True:
-        get_api_answer(timestamp)
+        response = get_api_answer(timestamp)
+        check_response(response)
         try:
             ...
 
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
         
+        # Ждем 600 секунд для повторного запроса
         bot.polling(interval=RETRY_PERIOD)
 
 if __name__ == '__main__':
