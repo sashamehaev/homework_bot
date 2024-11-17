@@ -2,6 +2,7 @@ import logging
 import os
 import requests
 import time
+from pprint import pprint
 
 from dotenv import load_dotenv
 from telebot import TeleBot, types
@@ -39,8 +40,8 @@ def send_message(bot, message):
 
 
 def get_api_answer(timestamp):
-    """Получает ответ от и приводит его к типу данных Python API."""
-    payload = {'from_date': timestamp}
+    """Получает ответ от API и приводит его к типу данных Python."""
+    payload = {'from_date': 0}
     response = requests.get(ENDPOINT, headers=HEADERS, params=payload)
     return response.json()
 
@@ -52,8 +53,8 @@ def check_response(response):
 
 
 def parse_status(homework):
-    ...
-
+    homework_name = homework['homework_name']
+    verdict = homework['status']
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
 
 
@@ -69,14 +70,15 @@ def main():
     while True:
         response = get_api_answer(timestamp)
         check_response(response)
+        homework = response['homeworks'][0]
+        print(parse_status(homework))
         try:
             ...
 
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
 
-        # Ждем 600 секунд для повторного запроса
-        bot.polling(interval=RETRY_PERIOD)
+        bot.polling()
 
 if __name__ == '__main__':
     main()
