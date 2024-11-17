@@ -6,7 +6,7 @@ import time
 from dotenv import load_dotenv
 from telebot import TeleBot, types
 
-from exceptions import TokenError, ServerError
+from exceptions import TokenError, IncorrectTypeOfResponse
 
 load_dotenv()
 
@@ -39,14 +39,16 @@ def send_message(bot, message):
 
 
 def get_api_answer(timestamp):
+    """Получает ответ от и приводит его к типу данных Python API."""
     payload = {'from_date': timestamp}
     response = requests.get(ENDPOINT, headers=HEADERS, params=payload)
-    return response
+    return response.json()
 
 
 def check_response(response):
-    if not response.ok:
-        raise ServerError
+    """Проверяет тип данных ответа API."""
+    if not isinstance(response, dict):
+        raise IncorrectTypeOfResponse
 
 
 def parse_status(homework):
@@ -72,7 +74,7 @@ def main():
 
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
-        
+
         # Ждем 600 секунд для повторного запроса
         bot.polling(interval=RETRY_PERIOD)
 
