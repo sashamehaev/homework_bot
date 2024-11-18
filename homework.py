@@ -69,7 +69,6 @@ def parse_status(homework):
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
 
 
-
 def main():
     """Основная логика работы бота."""
     # Создаем объект класса бота
@@ -87,9 +86,8 @@ def main():
             print(message)
 
         time.sleep(600)
-        # bot.polling()
+        bot.polling(none_stop=True)
+
 
 if __name__ == '__main__':
     main()
-
-
