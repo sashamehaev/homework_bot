@@ -59,11 +59,13 @@ def get_api_answer(timestamp):
         print(message)
     if response.status_code != 200:
         raise ServerResponseError
+    if len(response.json()['homeworks']) == 0:
+        logging.debug('Статус домашнего задания не изменился.')
     return response.json()
 
 
 def check_response(response):
-    """..."""
+    """Проверяет ответ на соответствие типам и значениям."""
     if 'homeworks' not in response:
         raise TypeError
     if not isinstance(response, dict):
