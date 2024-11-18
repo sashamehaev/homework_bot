@@ -42,6 +42,7 @@ def check_tokens():
     if PRACTICUM_TOKEN and TELEGRAM_TOKEN and TELEGRAM_CHAT_ID:
         return
     else:
+        logging.critical('Отсутствуют обязательные токены.')
         raise TokenError
 
 
