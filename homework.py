@@ -2,12 +2,17 @@ import logging
 import os
 import requests
 import time
+
 from pprint import pprint
-
 from dotenv import load_dotenv
-from telebot import TeleBot, types
+from telebot import TeleBot
 
-from exceptions import TokenError, ResponseTypeError, HomeworkIndexError, ServerResponseError
+from exceptions import (
+    TokenError,
+    ServerResponseError,
+    NotContainHomeworkError,
+    HomeworkValuesError
+)
 
 load_dotenv()
 
@@ -25,6 +30,11 @@ HOMEWORK_VERDICTS = {
     'reviewing': 'Работа взята на проверку ревьюером.',
     'rejected': 'Работа проверена: у ревьюера есть замечания.'
 }
+
+logging.basicConfig(
+    format='%(lineno)d – %(levelname)s: %(message)s',
+    level=logging.DEBUG
+)
 
 
 def check_tokens():
@@ -64,8 +74,12 @@ def check_response(response):
 
 def parse_status(homework):
     """Подготавливает ответ API."""
-    homework_name = homework['homeworks'][0]['homework_name']
-    verdict = HOMEWORK_VERDICTS[homework['homeworks'][0]['status']]
+    if homework['status'] not in HOMEWORK_VERDICTS or 'status' not in homework:
+        raise HomeworkValuesError
+    if 'homework_name' not in homework:
+        raise NotContainHomeworkError
+    homework_name = homework['homework_name']
+    verdict = HOMEWORK_VERDICTS[homework['status']]
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
 
 
@@ -78,15 +92,15 @@ def main():
 
     while True:
         try:
-            test = get_api_answer(timestamp)
-            check_response(test)
-            parse_status(test)
+            response = get_api_answer(timestamp)
+            check_response(response)
+            parse_status(response['homeworks'][0])
         except Exception as error:
+            logging.error(error)
             message = f'Сбой в работе программы: {error}'
             print(message)
 
         time.sleep(600)
-        bot.polling(none_stop=True)
 
 
 if __name__ == '__main__':

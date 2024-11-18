@@ -28,3 +28,19 @@ class ServerResponseError(Exception):
     def __str__(self):
         """Не удалось получить успешный ответ от API."""
         return 'Не удалось получить успешный ответ от API.'
+
+
+class NotContainHomeworkError(Exception):
+    """В ответе API не попали домашние работы."""
+
+    def __str__(self):
+        """В ответе API не попали домашние работы."""
+        return 'В ответе API не попали домашние работы.'
+
+
+class HomeworkValuesError(Exception):
+    """API прислало задание с неверным статусом."""
+
+    def __str__(self):
+        """API прислало задание с неверным статусом."""
+        return 'API прислало задание с неверным статусом.'
