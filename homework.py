@@ -3,15 +3,14 @@ import os
 import requests
 import time
 
-from pprint import pprint
 from dotenv import load_dotenv
 from telebot import TeleBot
 
 from exceptions import (
-    TokenError,
-    ServerResponseError,
+    HomeworkValuesError,
     NotContainHomeworkError,
-    HomeworkValuesError
+    ServerResponseError,
+    TokenError
 )
 
 load_dotenv()
@@ -32,7 +31,7 @@ HOMEWORK_VERDICTS = {
 }
 
 logging.basicConfig(
-    format='%(lineno)d – %(levelname)s: %(message)s',
+    format='%(asctime)s, %(lineno)d, %(levelname)s: %(message)s',
     level=logging.DEBUG
 )
 
