@@ -48,6 +48,8 @@ def check_tokens():
 
 def send_message(bot, message):
     """Отправляет результат пользователю в телеграмм."""
+    bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
+    logging.debug('Сообщение отправлено пользователю.')
 
 
 def get_api_answer(timestamp):
@@ -97,12 +99,12 @@ def main():
         try:
             response = get_api_answer(timestamp)
             check_response(response)
-            parse_status(response['homeworks'][0])
+            message = parse_status(response['homeworks'][0])
+            send_message(bot, message)
         except Exception as error:
             logging.error(error)
             message = f'Сбой в работе программы: {error}'
             print(message)
-
         time.sleep(600)
 
 
