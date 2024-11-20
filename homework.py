@@ -1,8 +1,8 @@
 import logging
 import os
-import requests
 import time
 
+import requests
 from dotenv import load_dotenv
 from telebot import TeleBot
 
@@ -20,6 +20,7 @@ TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 
 RETRY_PERIOD = 600
+LOGGING_FORMAT = '%(asctime)s, %(lineno)d, %(levelname)s: %(message)s'
 ENDPOINT = 'https://practicum.yandex.ru/api/user_api/homework_statuses/'
 HEADERS = {'Authorization': f'OAuth {PRACTICUM_TOKEN}'}
 
@@ -30,8 +31,9 @@ HOMEWORK_VERDICTS = {
     'rejected': 'Работа проверена: у ревьюера есть замечания.'
 }
 
+
 logging.basicConfig(
-    format='%(asctime)s, %(lineno)d, %(levelname)s: %(message)s',
+    format=LOGGING_FORMAT,
     level=logging.DEBUG
 )
 
@@ -41,7 +43,15 @@ def check_tokens():
     if PRACTICUM_TOKEN and TELEGRAM_TOKEN and TELEGRAM_CHAT_ID:
         return
     else:
-        logging.critical('Отсутствуют обязательные токены.')
+        logging_tokens = dict(
+            PRACTICUM_TOKEN=PRACTICUM_TOKEN,
+            TELEGRAM_TOKEN=TELEGRAM_TOKEN,
+            TELEGRAM_CHAT_ID=TELEGRAM_CHAT_ID
+        )
+        print(logging_tokens)
+        logging.critical(
+            f'{logging_tokens} Не все обязательные токены заполнены.'
+        )
         raise TokenError
 
 
@@ -54,11 +64,10 @@ def send_message(bot, message):
 def get_api_answer(timestamp):
     """Получает ответ от API и приводит его к типу данных Python."""
     try:
-        payload = {'from_date': timestamp}
+        payload = {'from_date': 0}
         response = requests.get(ENDPOINT, headers=HEADERS, params=payload)
     except requests.RequestException as error:
         message = f'Сбой в работе программы: {error}'
-        print(message)
     if response.status_code != 200:
         raise ServerResponseError
     if len(response.json()['homeworks']) == 0:
@@ -103,7 +112,6 @@ def main():
         except Exception as error:
             logging.error(error)
             message = f'Сбой в работе программы: {error}'
-            print(message)
         time.sleep(600)
 
 
