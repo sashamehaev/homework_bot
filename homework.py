@@ -2,6 +2,7 @@ import logging
 import os
 import time
 
+from http import HTTPStatus
 from pprint import pprint
 import requests
 from dotenv import load_dotenv
@@ -69,15 +70,14 @@ def send_message(bot, message):
 
 def get_api_answer(timestamp):
     """Получает ответ от API и приводит его к типу данных Python."""
+    logging.debug('Ожидание ответа API.')
     try:
-        payload = {'from_date': 0}
+        payload = {'from_date': timestamp}
         response = requests.get(ENDPOINT, headers=HEADERS, params=payload)
-    except requests.RequestException as error:
-        message = f'Сбой в работе программы: {error}'
-    if response.status_code != 200:
+    except Exception:
+        logging.debug('Не удалось получить ответ API.')
+    if response.status_code != HTTPStatus.OK:
         raise ServerResponseError
-    if len(response.json()['homeworks']) == 0:
-        logging.debug('Статус домашнего задания не изменился.')
     return response.json()
 
 
@@ -112,6 +112,8 @@ def main():
     while True:
         try:
             response = get_api_answer(timestamp)
+            if not response['homeworks']:
+                logging.debug('Статус домашнего задания не изменился.')
             check_response(response)
             message = parse_status(response['homeworks'][0])
             send_message(bot, message)
