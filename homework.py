@@ -113,7 +113,7 @@ def main():
     check_tokens()
     bot = TeleBot(token=TELEGRAM_TOKEN)
     timestamp = int(time.time())
-
+    last_status = ''
     while True:
         try:
             response = get_api_answer(timestamp)
@@ -121,11 +121,14 @@ def main():
                 logging.debug('Статус домашнего задания не изменился.')
             check_response(response)
             message = parse_status(response['homeworks'][0])
-            send_message(bot, message)
+            if last_status != message:
+                send_message(bot, message)
+            last_status = message
         except Exception as error:
             logging.error(error)
             message = f'Сбой в работе программы: {error}'
-        time.sleep(600)
+        finally:
+            time.sleep(RETRY_PERIOD)
 
 
 if __name__ == '__main__':
