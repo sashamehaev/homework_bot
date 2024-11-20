@@ -31,11 +31,11 @@ class ServerResponseError(Exception):
 
 
 class NotContainHomeworkError(Exception):
-    """В ответе API не попали домашние работы."""
+    """В ответе API нет ключа 'homework_name'."""
 
     def __str__(self):
-        """В ответе API не попали домашние работы."""
-        return 'В ответе API не попали домашние работы.'
+        """В ответе API нет ключа 'homework_name'."""
+        return 'В ответе API нет ключа "homework_name".'
 
 
 class HomeworkValuesError(Exception):
@@ -52,3 +52,35 @@ class SendMessageError(Exception):
     def __str__(self):
         """API не удалось отправить сообщение пользователю."""
         return 'API не удалось отправить сообщение пользователю.'
+
+
+class KeyError(Exception):
+    """Не удалось найти ключ homeworks в ответе API."""
+
+    def __str__(self):
+        """Не удалось найти ключ homeworks в ответе API."""
+        return 'Не удалось найти ключ homeworks в ответе API.'
+
+
+class ResponseTypeDictError(Exception):
+    """Неверный тип. Ожидаемый тип dict."""
+
+    def __str__(self):
+        """Неверный тип. Ожидаемый тип dict."""
+        return 'Неверный тип. Ожидаемый тип dict.'
+
+
+class ResponseHomeworksTypeListError(Exception):
+    """Неверный тип данных списка домашних работ. Ожидаемый тип list."""
+
+    def __str__(self):
+        """Неверный тип данных списка домашних работ. Ожидаемый тип list."""
+        return 'Неверный тип данных списка домашних работ. Ожидаемый тип list.'
+
+
+class HomeworkStatusKeyError(Exception):
+    """Остутсвует ключ 'status' в ответе API."""
+
+    def __str__(self):
+        """Остутсвует ключ 'status' в ответе API."""
+        return 'Остутсвует ключ "status" в ответе API.'

@@ -13,7 +13,10 @@ from exceptions import (
     NotContainHomeworkError,
     ServerResponseError,
     TokenError,
-    SendMessageError
+    SendMessageError,
+    ResponseTypeDictError,
+    ResponseHomeworksTypeListError,
+    HomeworkStatusKeyError
 )
 
 load_dotenv()
@@ -83,18 +86,20 @@ def get_api_answer(timestamp):
 
 def check_response(response):
     """Проверяет ответ на соответствие типам и значениям."""
-    if 'homeworks' not in response:
-        raise TypeError
-    if not isinstance(response, dict):
-        raise TypeError
     if not isinstance(response['homeworks'], list):
-        raise TypeError
+        raise ResponseHomeworksTypeListError
+    if 'homeworks' not in response:
+        raise KeyError
+    if not isinstance(response, dict):
+        raise ResponseTypeDictError
 
 
 def parse_status(homework):
     """Подготавливает ответ API."""
-    if homework['status'] not in HOMEWORK_VERDICTS or 'status' not in homework:
+    if homework['status'] not in HOMEWORK_VERDICTS:
         raise HomeworkValuesError
+    if 'status' not in homework:
+        raise HomeworkStatusKeyError
     if 'homework_name' not in homework:
         raise NotContainHomeworkError
     homework_name = homework['homework_name']
