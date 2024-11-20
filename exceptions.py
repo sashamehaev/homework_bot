@@ -44,3 +44,11 @@ class HomeworkValuesError(Exception):
     def __str__(self):
         """API прислало задание с неверным статусом."""
         return 'API прислало задание с неверным статусом.'
+
+
+class SendMessageError(Exception):
+    """API не удалось отправить сообщение пользователю."""
+
+    def __str__(self):
+        """API не удалось отправить сообщение пользователю."""
+        return 'API не удалось отправить сообщение пользователю.'

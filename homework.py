@@ -2,6 +2,7 @@ import logging
 import os
 import time
 
+from pprint import pprint
 import requests
 from dotenv import load_dotenv
 from telebot import TeleBot
@@ -10,7 +11,8 @@ from exceptions import (
     HomeworkValuesError,
     NotContainHomeworkError,
     ServerResponseError,
-    TokenError
+    TokenError,
+    SendMessageError
 )
 
 load_dotenv()
@@ -57,8 +59,12 @@ def check_tokens():
 
 def send_message(bot, message):
     """Отправляет результат пользователю в телеграмм."""
-    bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
-    logging.debug('Сообщение отправлено пользователю.')
+    logging.debug('Сообщение отправляется пользователю.')
+    try:
+        result = bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
+        logging.debug(f'Сообщение {result.text} отправлено пользователю.')
+    except Exception:
+        logging.error('Сбой при отправке сообщения в телеграмм.')
 
 
 def get_api_answer(timestamp):
