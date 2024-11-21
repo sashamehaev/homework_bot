@@ -6,15 +6,13 @@ from http import HTTPStatus
 import requests
 from dotenv import load_dotenv
 from telebot import TeleBot
+from pprint import pprint
 
 from exceptions import (
-    HomeworkValuesError,
+    HomeworkStatusError,
     NotContainHomeworkError,
     ServerResponseError,
-    TokenError,
-    ResponseDictTypeError,
-    ResponseHomeworksListTypeError,
-    HomeworkStatusKeyError
+    TokenError
 )
 
 load_dotenv()
@@ -36,27 +34,17 @@ HOMEWORK_VERDICTS = {
 }
 
 
-logging.basicConfig(
-    format=LOGGING_FORMAT,
-    level=logging.DEBUG
-)
-
-
 def check_tokens():
     """Ищет токены в переменных окружения."""
-    if PRACTICUM_TOKEN and TELEGRAM_TOKEN and TELEGRAM_CHAT_ID:
-        return
-    else:
-        logging_tokens = dict(
-            PRACTICUM_TOKEN=PRACTICUM_TOKEN,
-            TELEGRAM_TOKEN=TELEGRAM_TOKEN,
-            TELEGRAM_CHAT_ID=TELEGRAM_CHAT_ID
-        )
-        print(logging_tokens)
-        logging.critical(
-            f'{logging_tokens} Не все обязательные токены заполнены.'
-        )
-        raise TokenError
+    logging_tokens = {
+        'PRACTICUM_TOKEN': PRACTICUM_TOKEN,
+        'TELEGRAM_TOKEN': TELEGRAM_TOKEN,
+        'TELEGRAM_CHAT_ID': TELEGRAM_CHAT_ID
+    }
+    for token in logging_tokens:
+        if not logging_tokens[token]:
+            logging.critical(f'Отсутствует токен {token}.')
+            raise TokenError
 
 
 def send_message(bot, message):
@@ -73,7 +61,7 @@ def get_api_answer(timestamp):
     """Получает ответ от API и приводит его к типу данных Python."""
     logging.debug('Ожидание ответа API.')
     try:
-        payload = {'from_date': timestamp}
+        payload = {'from_date': 0}
         response = requests.get(ENDPOINT, headers=HEADERS, params=payload)
     except Exception:
         logging.debug('Не удалось получить ответ API.')
@@ -85,21 +73,29 @@ def get_api_answer(timestamp):
 def check_response(response):
     """Проверяет ответ на соответствие типам и значениям."""
     if not isinstance(response, dict):
-        raise ResponseDictTypeError
+        raise TypeError(
+            'В ответе API неверный тип данных. Ожидаемый тип dict.'
+        )
     if 'homeworks' not in response:
-        raise KeyError
+        raise KeyError('Не удалось найти ключ homeworks в ответе API.')
     if not isinstance(response['homeworks'], list):
-        raise ResponseHomeworksListTypeError
+        raise TypeError(
+            """В ответе API неверный тип данных домашних работ.
+            Ожидаемый тип list."""
+        )
 
 
 def parse_status(homework):
     """Подготавливает ответ API."""
     if homework['status'] not in HOMEWORK_VERDICTS:
-        raise HomeworkValuesError
+        raise ValueError(
+            """В словаре HOMEWORK_VERDICTS
+            нет значения из домашней работы под ключем "status" ответа API."""
+        )
     if 'homework_name' not in homework:
-        raise NotContainHomeworkError
+        raise KeyError('В домашней работе нет ключа homework_name')
     if 'status' not in homework:
-        raise HomeworkStatusKeyError
+        raise KeyError('В домашней работе нет ключа "status"')
     homework_name = homework['homework_name']
     verdict = HOMEWORK_VERDICTS[homework['status']]
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
@@ -130,4 +126,8 @@ def main():
 
 
 if __name__ == '__main__':
+    logging.basicConfig(
+        format=LOGGING_FORMAT,
+        level=logging.DEBUG
+    )
     main()
