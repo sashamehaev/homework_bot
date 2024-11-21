@@ -6,11 +6,8 @@ from http import HTTPStatus
 import requests
 from dotenv import load_dotenv
 from telebot import TeleBot
-from pprint import pprint
 
 from exceptions import (
-    HomeworkStatusError,
-    NotContainHomeworkError,
     ServerResponseError,
     TokenError
 )
