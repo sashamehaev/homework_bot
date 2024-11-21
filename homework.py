@@ -3,7 +3,7 @@ import os
 import time
 
 from http import HTTPStatus
-from pprint import pprint
+
 import requests
 from dotenv import load_dotenv
 from telebot import TeleBot
@@ -13,9 +13,8 @@ from exceptions import (
     NotContainHomeworkError,
     ServerResponseError,
     TokenError,
-    SendMessageError,
-    ResponseTypeDictError,
-    ResponseHomeworksTypeListError,
+    ResponseDictTypeError,
+    ResponseHomeworksListTypeError,
     HomeworkStatusKeyError
 )
 
@@ -86,22 +85,22 @@ def get_api_answer(timestamp):
 
 def check_response(response):
     """Проверяет ответ на соответствие типам и значениям."""
-    if not isinstance(response['homeworks'], list):
-        raise ResponseHomeworksTypeListError
+    if not isinstance(response, dict):
+        raise ResponseDictTypeError
     if 'homeworks' not in response:
         raise KeyError
-    if not isinstance(response, dict):
-        raise ResponseTypeDictError
+    if not isinstance(response['homeworks'], list):
+        raise ResponseHomeworksListTypeError
 
 
 def parse_status(homework):
     """Подготавливает ответ API."""
     if homework['status'] not in HOMEWORK_VERDICTS:
         raise HomeworkValuesError
-    if 'status' not in homework:
-        raise HomeworkStatusKeyError
     if 'homework_name' not in homework:
         raise NotContainHomeworkError
+    if 'status' not in homework:
+        raise HomeworkStatusKeyError
     homework_name = homework['homework_name']
     verdict = HOMEWORK_VERDICTS[homework['status']]
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'

@@ -62,7 +62,7 @@ class KeyError(Exception):
         return 'Не удалось найти ключ homeworks в ответе API.'
 
 
-class ResponseTypeDictError(Exception):
+class ResponseDictTypeError(TypeError):
     """Неверный тип. Ожидаемый тип dict."""
 
     def __str__(self):
@@ -70,7 +70,7 @@ class ResponseTypeDictError(Exception):
         return 'Неверный тип. Ожидаемый тип dict.'
 
 
-class ResponseHomeworksTypeListError(Exception):
+class ResponseHomeworksListTypeError(TypeError):
     """Неверный тип данных списка домашних работ. Ожидаемый тип list."""
 
     def __str__(self):
