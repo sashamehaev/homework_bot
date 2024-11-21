@@ -87,6 +87,8 @@ def check_response(response):
 
 def parse_status(homework):
     """Подготавливает ответ API."""
+    if 'status' not in homework:
+        raise KeyError('В домашней работе нет ключа "status"')
     if homework['status'] not in HOMEWORK_VERDICTS:
         raise ValueError(
             """В словаре HOMEWORK_VERDICTS
@@ -94,8 +96,6 @@ def parse_status(homework):
         )
     if 'homework_name' not in homework:
         raise KeyError('В домашней работе нет ключа homework_name')
-    if 'status' not in homework:
-        raise KeyError('В домашней работе нет ключа "status"')
     homework_name = homework['homework_name']
     verdict = HOMEWORK_VERDICTS[homework['status']]
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
@@ -111,13 +111,14 @@ def main():
     while True:
         try:
             response = get_api_answer(timestamp)
+            check_response(response)
             if not response['homeworks']:
                 logging.debug('Статус домашнего задания не изменился.')
-            check_response(response)
-            message = parse_status(response['homeworks'][0])
-            if last_status != message:
-                send_message(bot, message)
-            last_status = message
+            else:
+                message = parse_status(response['homeworks'][0])
+                if last_status != message:
+                    send_message(bot, message)
+                last_status = message
         except Exception as error:
             logging.error(error)
             message = f'Сбой в работе программы: {error}'
