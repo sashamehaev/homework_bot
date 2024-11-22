@@ -23,7 +23,6 @@ LOGGING_FORMAT = '%(asctime)s, %(lineno)d, %(levelname)s: %(message)s'
 ENDPOINT = 'https://practicum.yandex.ru/api/user_api/homework_statuses/'
 HEADERS = {'Authorization': f'OAuth {PRACTICUM_TOKEN}'}
 
-
 HOMEWORK_VERDICTS = {
     'approved': 'Работа проверена: ревьюеру всё понравилось. Ура!',
     'reviewing': 'Работа взята на проверку ревьюером.',
@@ -38,10 +37,13 @@ def check_tokens():
         'TELEGRAM_TOKEN': TELEGRAM_TOKEN,
         'TELEGRAM_CHAT_ID': TELEGRAM_CHAT_ID
     }
+    has_not_token = None
     for token in logging_tokens:
         if not logging_tokens[token]:
+            has_not_token = True
             logging.critical(f'Отсутствует токен {token}.')
-            raise TokenError
+    if has_not_token:
+        raise TokenError
 
 
 def send_message(bot, message):
@@ -58,7 +60,7 @@ def get_api_answer(timestamp):
     """Получает ответ от API и приводит его к типу данных Python."""
     logging.debug('Ожидание ответа API.')
     try:
-        payload = {'from_date': 0}
+        payload = {'from_date': timestamp}
         response = requests.get(ENDPOINT, headers=HEADERS, params=payload)
     except Exception:
         logging.debug('Не удалось получить ответ API.')
@@ -84,9 +86,10 @@ def check_response(response):
 
 def parse_status(homework):
     """Подготавливает ответ API."""
+    homework_status = homework['status']
     if 'status' not in homework:
         raise KeyError('В домашней работе нет ключа "status"')
-    if homework['status'] not in HOMEWORK_VERDICTS:
+    if homework_status not in HOMEWORK_VERDICTS:
         raise ValueError(
             """В словаре HOMEWORK_VERDICTS
             нет значения из домашней работы под ключем "status" ответа API."""
@@ -94,7 +97,7 @@ def parse_status(homework):
     if 'homework_name' not in homework:
         raise KeyError('В домашней работе нет ключа homework_name')
     homework_name = homework['homework_name']
-    verdict = HOMEWORK_VERDICTS[homework['status']]
+    verdict = HOMEWORK_VERDICTS[homework_status]
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
 
 
