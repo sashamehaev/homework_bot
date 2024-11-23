@@ -37,12 +37,13 @@ def check_tokens():
         'TELEGRAM_TOKEN': TELEGRAM_TOKEN,
         'TELEGRAM_CHAT_ID': TELEGRAM_CHAT_ID
     }
-    has_not_token = None
-    for token in logging_tokens:
-        if not logging_tokens[token]:
-            has_not_token = True
-            logging.critical(f'Отсутствует токен {token}.')
-    if has_not_token:
+    empty_tokens = []
+    for name, token in logging_tokens.items():
+        if not token:
+            empty_tokens.append(name)
+    empty_tokens_str = ', '.join(empty_tokens)
+    if empty_tokens:
+        logging.critical(f'Отсутствуют токены {empty_tokens_str}.')
         raise TokenError
 
 
@@ -86,9 +87,9 @@ def check_response(response):
 
 def parse_status(homework):
     """Подготавливает ответ API."""
-    homework_status = homework['status']
     if 'status' not in homework:
         raise KeyError('В домашней работе нет ключа "status"')
+    homework_status = homework['status']
     if homework_status not in HOMEWORK_VERDICTS:
         raise ValueError(
             """В словаре HOMEWORK_VERDICTS
